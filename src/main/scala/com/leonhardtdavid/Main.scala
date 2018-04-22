@@ -16,14 +16,14 @@ import scala.concurrent.duration._
 
 object Main {
 
+  // To get higher rendering speed on JDK8 or later
+  System.setProperty("sun.java2d.cmm", "sun.java2d.cmm.kcms.KcmsServiceProvider")
+
   implicit val system: ActorSystem = ActorSystem()
   implicit val ec: ExecutionContext = system.dispatcher
   implicit val materializer: ActorMaterializer = ActorMaterializer()
 
   private val logger = Logging(this.system, "application")
-
-  System.setProperty("java.awt.headless", "true")
-  System.setProperty("sun.java2d.cmm", "sun.java2d.cmm.kcms.KcmsServiceProvider")
 
   def main(args: Array[String]): Unit = {
     val directory = args(0)
@@ -37,8 +37,9 @@ object Main {
         try {
           val pdf = PDDocument.load(new File(path.toString))
           val stripper = new PDFTextStripper
-          stripper.setAddMoreFormatting(true)
+          stripper.setAddMoreFormatting(true) // Agrega más separación en el texto extraído para una mejor visualización
           val text = stripper.getText(pdf)
+          pdf.close() // Probablemente esto estaría en un try-finally si fuera una aplicación para producción
 
           val extractedText = maybeRegex match {
             case Some(regex) =>
